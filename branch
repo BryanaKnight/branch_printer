@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#local branches
+current=`cat .git/HEAD`
+value=${current#*:}
+for filename in .git/refs/heads/*
+do
+  current_branch=".git/${value//[[:blank:]]/}"
+  if [ $filename = $current_branch ]; then
+    echo "* `basename "$filename"`"
+  else
+    echo "  `basename "$filename"`"
+  fi
+done
+
+remote_head_ref=`cat .git/refs/remotes/origin/HEAD`
+head=${remote_head_ref#*remotes/}
+file_path=`dirname .git/refs/remotes/origin/HEAD`
+file=`basename .git/refs/remotes/origin/HEAD`
+echo "  ${file_path#*refs/}/$file -> $head"
+
+#remote refs
+cat .git/packed-refs | while read line
+do
+  string=$line
+  if [[ $string == *"remotes"* ]]
+  then
+    refs=${string#*/}
+    echo "  $refs"
+  fi
+done
