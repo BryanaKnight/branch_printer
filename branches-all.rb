@@ -11,21 +11,34 @@ class Branches
               :remote_branches
 
   def initialize
-    @master_branch = File.read('.git/HEAD').split(" ")[-1].gsub!('refs/heads/', '')
-    @remote_branches = File.open('.git/packed-refs')
     @local_branches = Dir['.git/refs/heads/*'].each {|b| b.gsub!('.git/refs/heads/', '') }
-    @head = Dir['.git/refs/remotes/origin/HEAD'].first
-    @head_pointer = File.read('.git/refs/remotes/origin/HEAD')
+    @master_branch = File.read('.git/HEAD').split(" ")[-1].gsub!('refs/heads/', '')
+    @remote_branches = get_remote_branches
     @printer = Printer
   end
 
   def print_output
     local_branches.each { |lb| printer.local(branch_prefix(lb), lb) }
-    printer.head(head, head_pointer)
-    remote_branches.each_line { |line| printer.remote(line) }
+    printer.head(head, head_pointer) unless get_head_pointer.nil?
+    remote_branches.each { |line| printer.remote(line) }
+  end
+
+  def get_head_pointer
+    return unless File.exist?('.git/refs/remotes/origin/HEAD')
+    @head = Dir['.git/refs/remotes/origin/HEAD'].first
+    @head_pointer = File.read('.git/refs/remotes/origin/HEAD')
   end
 
   private
+
+  def get_remote_branches
+    if File.exist?('.git/packed-refs')
+      File.open('.git/packed-refs')
+    else
+      Dir['.git/refs/remotes/origin/master']
+    end
+  end
+
 
   def branch_prefix(local_branch)
     local_branch == master_branch ? "* " : "  "
