@@ -35,10 +35,9 @@ class Branches
     if File.exist?('.git/packed-refs')
       File.open('.git/packed-refs')
     else
-      Dir['.git/refs/remotes/origin/master']
+      Dir['.git/refs/remotes/origin/*']
     end
   end
-
 
   def branch_prefix(local_branch)
     local_branch == master_branch ? "* " : "  "
