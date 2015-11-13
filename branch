@@ -13,6 +13,7 @@ do
   fi
 done
 
+#head
 remote_head_ref=`cat .git/refs/remotes/origin/HEAD`
 head=${remote_head_ref#*remotes/}
 file_path=`dirname .git/refs/remotes/origin/HEAD`
